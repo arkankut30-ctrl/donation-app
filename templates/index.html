@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <title>إدارة التبرعات</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <style>
+        .wallet-icon {
+            width: 80px;
+            height: 80px;
+            cursor: pointer;
+            margin: 10px;
+            transition: transform 0.2s;
+        }
+        .wallet-icon:hover {
+            transform: scale(1.1);
+        }
+    </style>
+</head>
+<body dir="rtl" class="container mt-4">
+
+    <!-- مقدمة تحفيزية -->
+    <div class="alert alert-warning text-center p-4 mb-4">
+        <h2 class="text-danger">🌟 شارك في الخير وساهم معنا 🌟</h2>
+        <p class="fs-5">
+            إن دعمك يساعدنا على الاستمرار وتقديم الأفضل.
+            كل تبرع مهما كان صغيرًا يصنع فرقًا كبيرًا.
+            ساهم الآن عبر المحافظ التالية واختر العملة التي تناسبك.
+        </p>
+        <button class="btn btn-lg btn-primary" data-bs-toggle="modal" data-bs-target="#donateModal">تبرع الآن</button>
+    </div>
+
+    <!-- نافذة اختيار العملة -->
+    <div class="modal fade" id="donateModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content p-4 text-center">
+                <h4 class="mb-3">اختر العملة للتبرع</h4>
+                <div class="d-flex justify-content-center mb-3">
+                    <button type="button" class="btn btn-light mx-2 next-modal-btn" data-next-modal="#btcModal">
+                        <img src="https://cryptologos.cc/logos/bitcoin-btc-logo.png" class="wallet-icon" alt="BTC">
+                    </button>
+                    <button type="button" class="btn btn-light mx-2 next-modal-btn" data-next-modal="#ethModal">
+                        <img src="https://cryptologos.cc/logos/ethereum-eth-logo.png" class="wallet-icon" alt="ETH">
+                    </button>
+                    <button type="button" class="btn btn-light mx-2 next-modal-btn" data-next-modal="#usdtModal">
+                        <img src="https://cryptologos.cc/logos/tether-usdt-logo.png" class="wallet-icon" alt="USDT">
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- نافذة BTC -->
+    <div class="modal fade" id="btcModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content p-3 text-center">
+                <h5>BTC</h5>
+                <p class="text-break">{{ wallets["BTC"] }}</p>
+                <img src="/static/qr/BTC.png" alt="QR BTC" width="120" height="120"><br>
+                <button class="btn btn-primary mt-2" onclick="copyAddress('{{ wallets['BTC'] }}')">📋 نسخ العنوان</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- نافذة ETH -->
+    <div class="modal fade" id="ethModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content p-3 text-center">
+                <h5>ETH (ERC20)</h5>
+                <p class="text-break">{{ wallets["ETH_ERC20"] }}</p>
+                <img src="/static/qr/ETH_ERC20.png" alt="QR ETH" width="120" height="120"><br>
+                <button class="btn btn-success mt-2" onclick="copyAddress('{{ wallets['ETH_ERC20'] }}')">📋 نسخ العنوان</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- نافذة USDT -->
+    <div class="modal fade" id="usdtModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content p-3 text-center">
+                <h5>USDT (TRON)</h5>
+                <p class="text-break">{{ wallets["USDT_TRON"] }}</p>
+                <img src="/static/qr/USDT_TRON.png" alt="QR USDT" width="120" height="120"><br>
+                <button class="btn btn-warning mt-2" onclick="copyAddress('{{ wallets['USDT_TRON'] }}')">📋 نسخ العنوان</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- نموذج إضافة تبرع -->
+    <form action="/add" method="post" class="row g-3 mb-4">
+        <div class="col-md-4">
+            <label class="form-label">اسم المتبرع:</label>
+            <input type="text" name="donor" class="form-control" required>
+        </div>
+        <div class="col-md-4">
+            <label class="form-label">المبلغ:</label>
+            <input type="text" name="amount" class="form-control" required>
+        </div>
+        <div class="col-md-4">
+            <label class="form-label">اختر الحساب:</label>
+            <select name="crypto_account" class="form-select" required>
+                <option value="{{ wallets['BTC'] }}">BTC</option>
+                <option value="{{ wallets['ETH_ERC20'] }}">ETH (ERC20)</option>
+                <option value="{{ wallets['USDT_TRON'] }}">USDT (TRON)</option>
+            </select>
+        </div>
+        <div class="col-12">
+            <button type="submit" class="btn btn-success">➕ إضافة تبرع</button>
+        </div>
+    </form>
+
+    <!-- جدول التبرعات -->
+    <h2 class="mb-3">📋 قائمة التبرعات</h2>
+    <table class="table table-striped table-bordered">
+        <thead class="table-dark">
+            <tr>
+                <th>اسم المتبرع</th>
+                <th>المبلغ</th>
+                <th>الحساب المستخدم</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for d in donations %}
+            <tr>
+                <td>{{ d["donor"] }}</td>
+                <td>{{ d["amount"] }}</td>
+                <td class="text-break">{{ d["crypto_account"] }}</td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="3" class="text-center">لا توجد تبرعات مسجلة بعد.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Bootstrap JS (مطلوب لتشغيل النوافذ المنبثقة Modals) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        function copyAddress(address) {
+            navigator.clipboard.writeText(address).then(function() {
+                alert("✅ تم نسخ العنوان: " + address);
+            }, function() {
+                alert("❌ فشل النسخ");
+            });
+        }
+
+        // فتح نافذة العملة بعد إغلاق نافذة الاختيار بشكل سليم
+        // (تفادي مشكلة تعليق الخلفية عند فتح modal من داخل modal آخر مباشرة)
+        document.addEventListener('DOMContentLoaded', function () {
+            var donateModalEl = document.getElementById('donateModal');
+            var donateModal = new bootstrap.Modal(donateModalEl);
+            var pendingNextModalId = null;
+
+            document.querySelectorAll('.next-modal-btn').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    pendingNextModalId = btn.getAttribute('data-next-modal');
+                    donateModal.hide();
+                });
+            });
+
+            donateModalEl.addEventListener('hidden.bs.modal', function () {
+                if (pendingNextModalId) {
+                    var nextModalEl = document.querySelector(pendingNextModalId);
+                    var nextModal = new bootstrap.Modal(nextModalEl);
+                    nextModal.show();
+                    pendingNextModalId = null;
+                }
+            });
+        });
+    </script>
+
+</body>
+</html>
