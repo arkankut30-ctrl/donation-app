@@ -5,7 +5,11 @@ import qrcode
 import os
 
 app = Flask(__name__)
-db_file = "donations.db"
+
+# مسار المجلد الذي يوجد فيه app.py نفسه، مهما كان مكان تشغيل البرنامج
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+db_file = os.path.join(BASE_DIR, "donations.db")
 
 CRYPTO_WALLETS = {
     "BTC": "bc1qre2ead3u4m2rek80vzme56qfa4y5m6xaeflymawf5ty8jqmf7q9v8nar",
@@ -13,7 +17,8 @@ CRYPTO_WALLETS = {
     "USDT_TRON": "TNAyDqdZ6qqatc6Gh71kwjnhw4kbtF7s5M"
 }
 
-QR_FOLDER = "static/qr"
+# مسار مطلق لمجلد static/qr، حتى يعمل بشكل صحيح على أي خادم (محلي أو PythonAnywhere)
+QR_FOLDER = os.path.join(BASE_DIR, "static", "qr")
 os.makedirs(QR_FOLDER, exist_ok=True)
 
 for name, address in CRYPTO_WALLETS.items():
